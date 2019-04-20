@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog } = require('electron')
 
 class AppWindow extends BrowserWindow {
   constructor(config, fileLocation) {
@@ -25,5 +25,13 @@ app.on('ready', () => {
       height: 400,
       parent: mainWindow
     }, './renderer/add.html')
+  })
+  ipcMain.on('open-music-file', () => {
+    dialog.showOpenDialog({
+      properties: ['openFile', 'multiSelections'],
+      filters: [{ name: 'Music', extensions: ['mp3'] }]
+    }, (files) => {
+      console.log(files);
+    })
   })
 })
