@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron')
-const { $ } = require('./helper')
+const { $, convertDuration } = require('./helper')
 let musicAudio = new Audio()
 let allTracks
 let currentTrack
@@ -33,14 +33,19 @@ const renderPlayerHTML = (name, duration) => {
                   正在播放：${name}
                 </div>
                 <div class="col">
-                  <span id="current-seeker">00:00</span> / ${duration}
+                  <span id="current-seeker">00:00</span> / ${convertDuration(duration)}
                 </div>`
   player.innerHTML = html
 }
 
-const updateProgressHTML = (currentTime) => {
+const updateProgressHTML = (currentTime, duration) => {
+  // 计算 progress 是当前要解决的问题
+  const progress = Math.floor(currentTime / duration * 100)
+  const bar = $('player-progress')
+  bar.innerHTML = progress + '%'
+  bar.style.width = progress + '%'
   const seeker = $('current-seeker')
-  seeker.innerHTML = currentTime
+  seeker.innerHTML = convertDuration(currentTime)
 }
 ipcRenderer.on('getTracks', (event, tracks) => {
   console.log('receive tracks', tracks)
@@ -55,7 +60,7 @@ musicAudio.addEventListener('loadedmetadata', () => {
 
 musicAudio.addEventListener('timeupdate', () => {
   //更新播放器状态
-  updateProgressHTML(musicAudio.currentTime)
+  updateProgressHTML(musicAudio.currentTime, musicAudio.duration)
 })
 $('tracksList').addEventListener('click', (event) => {
   event.preventDefault()
